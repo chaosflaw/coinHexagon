@@ -1,0 +1,187 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #e1e1e1;
+  color: #4d6066;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.grid {
+  width: auto;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.gridRow {
+  display: flex;
+  flex-flow: row nowrap;
+  margin: auto;
+}
+
+.gridRow:nth-child(even) {
+  transform: translateX(1.25em);
+}
+
+.gridRow:nth-child(odd) {
+  transform: translateX(-1.25em);
+}
+
+.gridRow:nth-child(1n+1) {
+  margin-top: -0.6666666667em;
+}
+
+.gridRow > li {
+  list-style-type: none;
+}
+
+.gridCoin {
+  margin: 0.1rem;
+  list-style-type: none;
+  width: 5em;
+  height: 5em;
+}
+
+.gridCoinIn {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: none;
+  border: 2px #97b7d6;
+  border-style: ridge groove groove ridge;
+  box-sizing: border-box !important;
+}
+
+.active {
+  background: #c0c0c0;
+  border-style: groove ridge ridge groove;
+  cursor: pointer;
+}
+
+.destination {
+  border: 4px #7771d2;
+  border-style: ridge groove groove ridge;
+  cursor: pointer;
+}
+
+.active.selected {
+  border: 6px double #21A076;
+}
+
+.active.win {
+  background: #9bb88b;
+}
+
+.rules {
+  z-index: 1;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  margin: 0 auto;
+  padding: 15px 15px 15px 20px;
+  border-radius: 15px;
+  background: #c0c0c0;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.rules > p {
+  text-indent: 1em;
+}
+
+.rules > ul > li {
+  margin-left: 1em;
+}
+
+.header {
+  text-align: center;
+  margin: 15px auto;
+}
+
+.footer {
+  margin: 0 auto;
+  width: auto;
+  text-align: center;
+}
+
+.footer > * {
+  cursor: pointer;
+}
+
+#reset {
+  float: left;
+  position: relative;
+  left: 0;
+}
+
+#rules {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#solution {
+  float: right;
+  position: relative;
+  right: 0;
+  width: initial;
+}
+
+@media screen and (min-width: 480px) and (max-width: 768px) {
+  .grid, .footer, .header {
+    width: 32em;
+  }
+
+  .gridCoin {
+    width: 4em;
+    height: 4em;
+  }
+
+  .gridRow:nth-child(even) {
+    transform: translateX(1em);
+  }
+
+  .gridRow:nth-child(odd) {
+    transform: translateX(-1em);
+  }
+
+  .gridRow:nth-child(1n+1) {
+    margin-top: -0.5333333333em;
+  }
+}
+@media screen and (max-width: 480px) {
+  .grid, .footer, .header {
+    width: 22em;
+  }
+
+  .gridCoin {
+    width: 2.75em;
+    height: 2.75em;
+  }
+
+  .gridRow:nth-child(even) {
+    transform: translateX(0.6875em);
+  }
+
+  .gridRow:nth-child(odd) {
+    transform: translateX(-0.6875em);
+  }
+
+  .gridRow:nth-child(1n+1) {
+    margin-top: -0.3666666667em;
+  }
+
+  .rules {
+    width: 90%;
+  }
+}
+
+/*# sourceMappingURL=coinH.css.map */
