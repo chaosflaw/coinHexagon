@@ -107,78 +107,70 @@ function moveCoin(Sr,Sc,Dr,Dc) {
 	}
 }
 
-//Count number of active coins surrounding the given coordinates
+// Count number of active coins surrounding the given coordinates
+// Due to how the array is mapped onto the hexagonal grid, even and odd rows can't be checked the same way; for example, if checking (1,2) you would look up (0,2),(0,3),(2,2),(2,3) [middle row irrelevant]
+// for (2,2), however, that would result in checking at an offset; instead, you would have to look at (1,1),(1,2),(3,1),(3,2)
+// There is a 'c' variable common to both cases [in (0,2) (0,3), (1,1) (1,2) for example, c == 2 is the common check.]
+// This allows the following expression to be used in place of a separate if...else for even and odd rows:
+// ( c - 1 + (2 * (r % 2)) )
+// Start with (c - 1), which corresponds to even rows. If r is even, then (r % 2) == 0 and the expression evaluates to (c - 1).
+// If r is odd, (r % 2) == 1 and the expression evaluates to (c + 1).
+
+// Maybe this expression should be made into its own function?
 function checkSurroundings(r,c){
 	let count = 0;
 	let cLength = gridArray[0].length - 1, rLength = gridArray.length - 1;
-	function commons() {
-		if (r>0){
-			if (gridArray[r-1][c]) {count++;} //top row same-column	
-		}
-		if (r<rLength) {
-			if (gridArray[r+1][c]) {count++;} //bot row same-column	
-		}
-		if (c>0){
-			if (gridArray[r][c-1]) {count++;} //mid row left
-		}
-		if (c<cLength) {
-			if (gridArray[r][c+1]) {count++;} //mid row right		
-		}
+	let cExpression = (c - 1) + (2 * (r % 2));
+
+	if (r>0){
+		if (gridArray[r-1][c]) {count++;} 			//top row, common c
+		if (gridArray[r-1][cExpression]) {count++;} //top row w/ even-odd check	
 	}
-	//Due to how the array is mapped onto the hexagonal grid, even and odd rows can't be checked the same way; for example, if checking (1,2) you would look up (0,2),(0,3),(2,2),(2,3) [middle row irrelevant]
-	//for (2,2), however, that would result in checking at an offset; instead, you would have to look at (1,1),(1,2),(3,1),(3,2)
-	//luckily, in both top and bottom rows there is a check for (r-1/r+1,c) so all that has to change is the c+1/c-1 check
-	//there is probably room for cleanup here, as the logic is a bit convoluted, but eh it works > 18/06/18: told ya, room for cleanup.
-	
-	/*if (r%2 == 0) {
-		if (c>0) {
-			if (r>0) {if (gridArray[r-1][c-1]) {count++;} }
-			if (r<rLength) {if (gridArray[r+1][c-1]) {count++;}}
-		}
-	} else {
-		if (c<cLength) {
-			if (r>0){if (gridArray[r-1][c+1]) {count++;}}
-			if (r<rLength) {if (gridArray[r+1][c+1]) {count++;}}
-		}
-	}*/
-	if (r>0) {if (gridArray[r-1][((c-1)+(2*(r%2)))]) {count++;} }
-	if (r<rLength) {if (gridArray[r+1][(c-1+(2*(r%2)))]) {count++;}}
-	commons();
+	if (r<rLength) {
+		if (gridArray[r+1][c]) {count++;} 			//bot row common c	
+		if (gridArray[r+1][cExpression]) {count++;} //bot row w/ even-odd check
+	}
+	if (c>0){
+		if (gridArray[r][c-1]) {count++;} 			//mid row left
+	}
+	if (c<cLength) {
+		if (gridArray[r][c+1]) {count++;} 			//mid row right		
+	}
 	return count;
 }
 
-//Given r,c coordinates, for every inactive coin around those coordinates, check if it is the center of a hexagon (checkSurroundings returns 6). If so, return true.
-//This is done to avoid having to check the whole board for the win condition: every time a move is made, we can look around the destination for the center of the hexagon, cutting back considerably on the number of coins we have to verify.
-//Like before, different rules for checking even and odd rows apply.
+// Given (r,c) coordinates, for every inactive coin around those coordinates, check if it is the center of a hexagon (checkSurroundings returns 6). If so, return true.
+// This is done to avoid having to check the whole board for the win condition: every time a move is made, we can look around the destination for the center of the hexagon, cutting back considerably on the number of coins we have to verify.
+// Like before, different rules for checking even and odd rows apply.
+// the try...catch block isn't exactly good practice as it does no error handling at all
+// but there is currently no actual need to handle the exceptions caused by the lack of border checking on the winCondition function
+
+// CAUTION: If this function is ever used in a more general sense, it should (probably) be modified to include border checks! Unforeseen consequences, Mr. Freeman.
 function winCondition(r,c) {
-	if (!gridArray[r-1][c]) { //top r, common c
+	let cExpression = (c - 1) + (2 * (r % 2));
+	try {
+		if (!gridArray[r-1][c]) { 			//top r, common c
 			if (checkSurroundings(r-1,c) == 6) { return true;}
-	}
-	if (!gridArray[r][c-1]) { //same r, left c
-			if (checkSurroundings(r,c-1) == 6) { return true;}
-	}
-	if (!gridArray[r][c+1]) { //same r, right c
-			if (checkSurroundings(r,c+1) == 6) { return true;}
-	}
-	if (!gridArray[r+1][c]) { //bot r, common c
-			if (checkSurroundings(r+1,c) == 6) { return true;}
-	}
-	
-	if (r%2 == 0) { //even rows
-		if (!gridArray[r-1][c-1]) {
+		}
+		if (!gridArray[r-1][cExpression]) { //top r, even/odd check
 			if (checkSurroundings(r-1,c-1) == 6) { return true;}
 		}
-		if (!gridArray[r+1][c-1]) {
+
+		if (!gridArray[r][c-1]) { 			//mid row left
+				if (checkSurroundings(r,c-1) == 6) { return true;}
+		}
+		if (!gridArray[r][c+1]) { 			//mid row right
+				if (checkSurroundings(r,c+1) == 6) { return true;}
+		}
+
+		if (!gridArray[r+1][c]) { 			//bot r, common c
+				if (checkSurroundings(r+1,c) == 6) { return true;}
+		}
+		if (!gridArray[r+1][cExpression]) {	// bot r, even/odd check
 			if (checkSurroundings(r+1,c-1) == 6) { return true;}
 		}
-	} else { //odd rows
-		if (!gridArray[r-1][c+1]) {
-			if (checkSurroundings(r-1,c+1) == 6) { return true;}
-		}
-		if (!gridArray[r+1][c+1]) {
-			if (checkSurroundings(r+1,c+1) == 6) { return true;}
-		}
 	}
+	catch {}
 	return false;
 }
 
@@ -186,7 +178,8 @@ function reset() {
 	for (let i = 0;i < timeouts.length;i++){ //clear solution() moveCoin timers
 		clearTimeout(timeouts[i]);
 	}
-	for (let r = 0; r < gridArray.length; r++) { //fill array with false values, then activate the six starting coins and reset the move counter
+	//fill array with false values, then activate the six starting coins and reset the move counter
+	for (let r = 0; r < gridArray.length; r++) {
 		gridArray[r].fill(false);
 	}
 	gridArray[2].fill(true,2,5);
